@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { format as d3Format } from "d3-format";
+import {some} from 'lodash';
 
 const handleStyle = {
   cursor: "move",
@@ -26,12 +27,16 @@ class Slider extends Component {
   componentDidMount() {
     window.addEventListener("mouseup", this.dragEnd, false);
     window.addEventListener("touchend", this.dragEnd, false);
+    window.addEventListener("touchmove", this.touchMove, {passive: false});
+
 
   }
 
   componentWillUnmount() {
     window.removeEventListener("mouseup", this.dragEnd, false);
     window.removeEventListener("touchend", this.dragEnd, false);
+    window.removeEventListener("touchmove", this.touchMove, {passive: false});
+
 
   }
 
@@ -71,7 +76,6 @@ class Slider extends Component {
   };
 
   dragFromSVG = e => {
-    console.log('hre');
     if (!this.state.dragging) {
       let selection = [...this.props.selection];
       let selected = this.props.scale.invert(e.nativeEvent.offsetX);
@@ -101,7 +105,6 @@ class Slider extends Component {
   };
 
   mouseMove = e => {
-    console.log('sdsfa', e);
     if (this.state.dragging) {
       let selection = [...this.props.selection];
       selection[this.state.dragIndex] = this.props.scale.invert(
@@ -112,10 +115,14 @@ class Slider extends Component {
   };
 
   touchMove = e => {
+
     if (this.state.dragging) {
+      e.preventDefault();
       let selection = [...this.props.selection];
+      console.log('t',selection);
+      if (some(selection, isNaN)) {this.props.onChange(selection.map(v => isNaN(v)? 0 : v)); return}
       let rect = e.target.getBoundingClientRect();
-      let offset = this.props.vertical ? e.nativeEvent.targetTouches[0].pageY - rect.left : e.nativeEvent.targetTouches[0].pageX - rect.left;
+      let offset = this.props.vertical ? e.targetTouches[0].pageY - rect.left : e.targetTouches[0].pageX - rect.left;
       selection[this.state.dragIndex] = this.props.scale.invert(
         offset
       );
@@ -153,14 +160,15 @@ class Slider extends Component {
     const f = d3Format(handleLabelFormat);
     return (
       <svg
-        style={sliderStyle}
+        style={Object.assign({},sliderStyle,{touchAction: 'none'})}
         height={height}
         width={width}
         onMouseDown={this.dragFromSVG}
         onTouchStart={this.dragFromSVG}
         onDoubleClick={reset}
         onMouseMove={this.mouseMove}
-        onTouchMove={this.touchMove}
+        // onTouchMove={this.touchMove}
+
       >
       <linearGradient id={`slider`} x1="0%" y1="0%" x2="100%" y2="0%">
         <stop offset="0%" style={{stopColor: backgroundColorFunction(selectionSorted[0])}} />
@@ -186,7 +194,7 @@ class Slider extends Component {
               key={`handle-${i}`}
             >
               <circle
-                style={handleStyle}
+                style={Object.assign({},handleStyle, {touchAction: 'none'})}
                 r={10}
                 cx={0}
                 cy={12.5}
@@ -194,7 +202,7 @@ class Slider extends Component {
                 strokeWidth="1"
               />
               <circle
-                style={handleStyle}
+                style={Object.assign({},handleStyle, {touchAction: 'none'})}
                 onMouseDown={this.dragStart.bind(this, i)}
                 onTouchStart={this.dragStart.bind(this,i)}
                 r={9}
