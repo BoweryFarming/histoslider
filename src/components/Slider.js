@@ -25,10 +25,14 @@ export const mapToKeyCode = code => {
 class Slider extends Component {
   componentDidMount() {
     window.addEventListener("mouseup", this.dragEnd, false);
+    window.addEventListener("touchend", this.dragEnd, false);
+
   }
 
   componentWillUnmount() {
     window.removeEventListener("mouseup", this.dragEnd, false);
+    window.removeEventListener("touchend", this.dragEnd, false);
+
   }
 
   constructor() {
@@ -67,6 +71,7 @@ class Slider extends Component {
   };
 
   dragFromSVG = e => {
+    console.log('hre');
     if (!this.state.dragging) {
       let selection = [...this.props.selection];
       let selected = this.props.scale.invert(e.nativeEvent.offsetX);
@@ -96,10 +101,23 @@ class Slider extends Component {
   };
 
   mouseMove = e => {
+    console.log('sdsfa', e);
     if (this.state.dragging) {
       let selection = [...this.props.selection];
       selection[this.state.dragIndex] = this.props.scale.invert(
         e.nativeEvent.offsetX
+      );
+      this.props.onChange(selection);
+    }
+  };
+
+  touchMove = e => {
+    if (this.state.dragging) {
+      let selection = [...this.props.selection];
+      let rect = e.target.getBoundingClientRect();
+      let offset = this.props.vertical ? e.nativeEvent.targetTouches[0].pageY - rect.left : e.nativeEvent.targetTouches[0].pageX - rect.left;
+      selection[this.state.dragIndex] = this.props.scale.invert(
+        offset
       );
       this.props.onChange(selection);
     }
@@ -139,8 +157,10 @@ class Slider extends Component {
         height={height}
         width={width}
         onMouseDown={this.dragFromSVG}
+        onTouchStart={this.dragFromSVG}
         onDoubleClick={reset}
         onMouseMove={this.mouseMove}
+        onTouchMove={this.touchMove}
       >
       <linearGradient id={`slider`} x1="0%" y1="0%" x2="100%" y2="0%">
         <stop offset="0%" style={{stopColor: backgroundColorFunction(selectionSorted[0])}} />
@@ -176,6 +196,7 @@ class Slider extends Component {
               <circle
                 style={handleStyle}
                 onMouseDown={this.dragStart.bind(this, i)}
+                onTouchStart={this.dragStart.bind(this,i)}
                 r={9}
                 cx={0}
                 cy={12}

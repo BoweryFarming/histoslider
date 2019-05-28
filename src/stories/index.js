@@ -20,12 +20,13 @@ const buckets1 = [{"x0":-45,"x":-40,"y":424},{"x0":-40,"x":-30,"y":0},{"x0":-30,
 // Stateful container for testing interaction
 class HistosliderContainer extends Component {
   state = {
-    selection: null
+    selection: []
   };
   setSelection = selection => {
     action("setSelection");
-    // this.setState({ selection });
     console.log('s',selection);
+    this.setState({ selection });
+
   };
   render = () =>
     <Histoslider
