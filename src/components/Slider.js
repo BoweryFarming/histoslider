@@ -4,7 +4,7 @@ import { format as d3Format } from "d3-format";
 
 const handleStyle = {
   cursor: "move",
-  userSekect: "none",
+  userSelect: "none",
   MozUserSelect: "none",
   KhtmlUserSelect: "none",
   WebkitUserSelect: "none",
@@ -119,13 +119,16 @@ class Slider extends Component {
       scale,
       format,
       handleLabelFormat,
+      backgroundColorFunction,
       width,
       height,
       reset,
       innerWidth,
       selectedColor,
       unselectedColor,
-      sliderStyle
+      sliderStyle,
+      vertical,
+      extent
     } = this.props;
     const selectionWidth = Math.abs(scale(selection[1]) - scale(selection[0]));
     const selectionSorted = Array.from(selection).sort((a, b) => +a - +b);
@@ -139,10 +142,17 @@ class Slider extends Component {
         onDoubleClick={reset}
         onMouseMove={this.mouseMove}
       >
+      <linearGradient id={`slider`} x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style={{stopColor: backgroundColorFunction(selectionSorted[0])}} />
+        <stop offset="25%" style={{stopColor: backgroundColorFunction(.75*selectionSorted[0]+.25*selectionSorted[1])}}/>
+        <stop offset="50%" style={{stopColor: backgroundColorFunction(.5*selectionSorted[0]+.5*selectionSorted[1])}}/>
+        <stop offset="75%" style={{stopColor: backgroundColorFunction(.25*selectionSorted[0]+.75*selectionSorted[1])}}/>
+        <stop offset="100%" style={{stopColor: backgroundColorFunction(selection[1])}} />
+      </linearGradient>
         <rect height={4} fill={unselectedColor} x={0} y={10} width={width} />
         <rect
           height={4}
-          fill={selectedColor}
+          fill="url(#slider)"
           x={scale(selectionSorted[0])}
           y={10}
           width={selectionWidth}
@@ -174,10 +184,10 @@ class Slider extends Component {
                 strokeWidth="1"
               />
               <text
-                style={handleStyle}
+                style={vertical ? Object.assign({},handleStyle,{transform: 'rotate(-90deg)'}) : handleStyle}
                 textAnchor="middle"
-                x={0}
-                y={36}
+                x={vertical ? -40 :0}
+                y={vertical ? 0: 36}
                 fill="#666"
                 fontSize={12}
               >
