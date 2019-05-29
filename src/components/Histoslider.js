@@ -28,7 +28,7 @@ class Histoslider extends Component {
     if (prevProps.onChange !== this.props.onChange){
       this.debouncedChange = debounce(this.props.onChange, 300)
     }
-    if (this.props.selection.length === 0) {
+    if (this.props.selection && this.props.selection.length === 0) {
         const sortedData = this.props.data.sort((a, b) => +a.x0 - +b.x0);
         const extent = [
           min(sortedData, ({ x0 }) => +x0),

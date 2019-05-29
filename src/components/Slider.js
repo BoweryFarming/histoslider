@@ -189,6 +189,7 @@ class Slider extends Component {
           return (
             <g
               tabIndex={0}
+              style={handleStyle}
               onKeyDown={this.keyDown.bind(this, i)}
               transform={`translate(${this.props.scale(m)}, 0)`}
               key={`handle-${i}`}
