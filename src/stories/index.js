@@ -9,7 +9,6 @@ const stressTestData = (n, offset = 0, multiplier = 1) =>
     x: (i + 1 + offset) * multiplier,
     y: (i % 5 + 1) * 10
   }))
-  console.log(x);
   return x;
 };
 
@@ -24,7 +23,6 @@ class HistosliderContainer extends Component {
   };
   setSelection = selection => {
     action("setSelection");
-    console.log('s',selection);
     this.setState({ selection });
 
   };

@@ -119,7 +119,6 @@ class Slider extends Component {
     if (this.state.dragging) {
       e.preventDefault();
       let selection = [...this.props.selection];
-      console.log('t',selection);
       if (some(selection, isNaN)) {this.props.onChange(selection.map(v => isNaN(v)? 0 : v)); return}
       let rect = e.target.getBoundingClientRect();
       let offset = this.props.vertical ? e.targetTouches[0].pageY - rect.left : e.targetTouches[0].pageX - rect.left;
