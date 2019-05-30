@@ -13,6 +13,7 @@ class Histogram extends Component {
       data,
       histogramStyle,
       showOnDrag,
+      backgroundColorFunction,
       selection,
       histogramPadding,
       reset,
@@ -26,7 +27,9 @@ class Histogram extends Component {
       barPadding,
       width,
       max,
-      dragging
+      dragging,
+      vertical,
+      minHeight
     } = this.props;
 
     const selectionSorted = Array.from(selection).sort((a, b) => +a - +b);
@@ -104,18 +107,22 @@ class Histogram extends Component {
                           transform={`translate(${scale(bucket.x0) +
                             barPadding / 2} 0)`}
                         >
+                        <linearGradient id={`grad_${i}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" style={{stopColor: backgroundColorFunction(bucket.x0)}} />
+                          <stop offset="100%" style={{stopColor: backgroundColorFunction(bucket.x)}} />
+                        </linearGradient>
                           <rect
                             fill={unselectedColor}
                             width={
                               scale(bucket.x) - scale(bucket.x0) - barPadding
                             }
-                            height={bucket.y / max * height}
+                            height={minHeight+bucket.y / max * height}
                             rx={barBorderRadius}
                             ry={barBorderRadius}
                             x={0}
                           />
                           <rect
-                            fill={selectedColor}
+                            fill={`url(#grad_${i})`}
                             onClick={this.selectBucket.bind(this, bucket)}
                             onDoubleClick={reset.bind(this)}
                             style={Object.assign(
@@ -125,7 +132,7 @@ class Histogram extends Component {
                             width={
                               scale(bucket.x) - scale(bucket.x0) - barPadding
                             }
-                            height={bucket.y / max * height}
+                            height={minHeight + bucket.y / max * height}
                             rx={barBorderRadius}
                             ry={barBorderRadius}
                             x={0}

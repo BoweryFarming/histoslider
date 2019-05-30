@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { format as d3Format } from "d3-format";
+import {some} from 'lodash';
 
 const handleStyle = {
   cursor: "move",
-  userSekect: "none",
+  userSelect: "none",
   MozUserSelect: "none",
   KhtmlUserSelect: "none",
   WebkitUserSelect: "none",
@@ -25,10 +26,18 @@ export const mapToKeyCode = code => {
 class Slider extends Component {
   componentDidMount() {
     window.addEventListener("mouseup", this.dragEnd, false);
+    window.addEventListener("touchend", this.dragEnd, false);
+    window.addEventListener("touchmove", this.touchMove, {passive: false});
+
+
   }
 
   componentWillUnmount() {
     window.removeEventListener("mouseup", this.dragEnd, false);
+    window.removeEventListener("touchend", this.dragEnd, false);
+    window.removeEventListener("touchmove", this.touchMove, {passive: false});
+
+
   }
 
   constructor() {
@@ -105,6 +114,21 @@ class Slider extends Component {
     }
   };
 
+  touchMove = e => {
+
+    if (this.state.dragging) {
+      e.preventDefault();
+      let selection = [...this.props.selection];
+      if (some(selection, isNaN)) {this.props.onChange(selection.map(v => isNaN(v)? 0 : v)); return}
+      let rect = e.target.getBoundingClientRect();
+      let offset = this.props.vertical ? e.targetTouches[0].pageY - rect.left : e.targetTouches[0].pageX - rect.left;
+      selection[this.state.dragIndex] = this.props.scale.invert(
+        offset
+      );
+      this.props.onChange(selection);
+    }
+  };
+
   keyDown = (index, e) => {
     const direction = mapToKeyCode(e.keyCode);
     const { keyboardStep } = this.props;
@@ -119,30 +143,43 @@ class Slider extends Component {
       scale,
       format,
       handleLabelFormat,
+      backgroundColorFunction,
       width,
       height,
       reset,
       innerWidth,
       selectedColor,
       unselectedColor,
-      sliderStyle
+      sliderStyle,
+      vertical,
+      extent
     } = this.props;
     const selectionWidth = Math.abs(scale(selection[1]) - scale(selection[0]));
     const selectionSorted = Array.from(selection).sort((a, b) => +a - +b);
     const f = d3Format(handleLabelFormat);
     return (
       <svg
-        style={sliderStyle}
+        style={Object.assign({},sliderStyle,{touchAction: 'none'})}
         height={height}
         width={width}
         onMouseDown={this.dragFromSVG}
+        onTouchStart={this.dragFromSVG}
         onDoubleClick={reset}
         onMouseMove={this.mouseMove}
+        // onTouchMove={this.touchMove}
+
       >
+      <linearGradient id={`slider`} x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style={{stopColor: backgroundColorFunction(selectionSorted[0])}} />
+        <stop offset="25%" style={{stopColor: backgroundColorFunction(.75*selectionSorted[0]+.25*selectionSorted[1])}}/>
+        <stop offset="50%" style={{stopColor: backgroundColorFunction(.5*selectionSorted[0]+.5*selectionSorted[1])}}/>
+        <stop offset="75%" style={{stopColor: backgroundColorFunction(.25*selectionSorted[0]+.75*selectionSorted[1])}}/>
+        <stop offset="100%" style={{stopColor: backgroundColorFunction(selection[1])}} />
+      </linearGradient>
         <rect height={4} fill={unselectedColor} x={0} y={10} width={width} />
         <rect
           height={4}
-          fill={selectedColor}
+          fill="url(#slider)"
           x={scale(selectionSorted[0])}
           y={10}
           width={selectionWidth}
@@ -151,12 +188,13 @@ class Slider extends Component {
           return (
             <g
               tabIndex={0}
+              style={handleStyle}
               onKeyDown={this.keyDown.bind(this, i)}
               transform={`translate(${this.props.scale(m)}, 0)`}
               key={`handle-${i}`}
             >
               <circle
-                style={handleStyle}
+                style={Object.assign({},handleStyle, {touchAction: 'none'})}
                 r={10}
                 cx={0}
                 cy={12.5}
@@ -164,8 +202,9 @@ class Slider extends Component {
                 strokeWidth="1"
               />
               <circle
-                style={handleStyle}
+                style={Object.assign({},handleStyle, {touchAction: 'none'})}
                 onMouseDown={this.dragStart.bind(this, i)}
+                onTouchStart={this.dragStart.bind(this,i)}
                 r={9}
                 cx={0}
                 cy={12}
@@ -174,10 +213,10 @@ class Slider extends Component {
                 strokeWidth="1"
               />
               <text
-                style={handleStyle}
+                style={vertical ? Object.assign({},handleStyle,{transform: 'rotate(-90deg)'}) : handleStyle}
                 textAnchor="middle"
-                x={0}
-                y={36}
+                x={vertical ? -40 :0}
+                y={vertical ? 0: 36}
                 fill="#666"
                 fontSize={12}
               >
