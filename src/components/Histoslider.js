@@ -26,6 +26,7 @@ class Histoslider extends Component {
 
   componentDidUpdate(prevProps){
     if (prevProps.onChange !== this.props.onChange){
+      this.debouncedChange.cancel();
       this.debouncedChange = debounce(this.props.onChange, 300)
     }
     if (this.props.selection && this.props.selection.length === 0) {
@@ -38,6 +39,11 @@ class Histoslider extends Component {
         this.props.onChange(extent)
       }
   }
+
+  componentWillUnmount(){
+    this.debouncedChange.cancel();
+  }
+
 
   onChange = selection => {
     const { data, onChange } = this.props;
@@ -111,8 +117,7 @@ class Histoslider extends Component {
           boxSizing: "border-box",
           position: "relative",
           transform: vertical ? `translate(${height}px, 0px) rotate(90deg)` : 'none',
-          transformOrigin: 'top left',
-          fontFamily: 'Apercu'
+          transformOrigin: 'top left'
         })}
         className="Histoslider Histoslider--wrapper"
       >
