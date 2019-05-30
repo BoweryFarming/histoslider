@@ -16,7 +16,7 @@ class Histoslider extends Component {
       selection: this.props.selection
     };
 
-    this.debouncedChange = debounce(this.props.onChange, 300)
+    this.debouncedChange = debounce(this.props.onChange, 275)
   }
 
   dragChange = dragging => {
