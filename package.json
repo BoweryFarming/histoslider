@@ -32,8 +32,7 @@
     "test": "react-scripts test --env=jsdom",
     "start": "start-storybook -p 9009 -s public",
     "build-storybook": "build-storybook -s public -o docs",
-    "build": "babel src --out-dir lib",
-    "prepare": "babel src --out-dir lib"
+    "build": "babel src --out-dir lib"
   },
   "dependencies": {
     "prop-types": "^15.5.10"
