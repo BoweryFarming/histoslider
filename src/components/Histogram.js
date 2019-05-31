@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { Motion, spring } from "react-motion";
 
 class Histogram extends Component {
   selectBucket(bucket) {
@@ -40,11 +39,8 @@ class Histogram extends Component {
     const o = showHistogramPredicate ? 1 : 0;
 
     return (
-      <Motion style={{ height: spring(h), opacity: spring(o) }}>
-        {s => {
-          return (
             <div
-              style={Object.assign({}, s, {
+              style={Object.assign({}, {
                 zIndex: 0,
                 overflow: "hidden",
                 position: showOnDrag && "absolute",
@@ -145,9 +141,6 @@ class Histogram extends Component {
               </svg>
             </div>
           );
-        }}
-      </Motion>
-    );
   }
 }
 
